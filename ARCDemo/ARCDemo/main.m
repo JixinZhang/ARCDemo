@@ -1,37 +1,31 @@
-#iOS ARC(代码演示引用计数的变化)
+//
+//  main.m
+//  ARCDemo
+//
+//  Created by ZhangBob on 30/06/2017.
+//  Copyright © 2017 Jixin. All rights reserved.
+//
 
-### 1.了解ARC
-* 自动引用计数(Automatic Refrence Counting)是Objective-C默认的内存管理机制，其针对堆上的对象，由编译器自动生成操作引用计数的指令（retain或者release），来管理对象的创建与释放。
-* 哪些对象受ARC管理：
-	* OC对象指针；
-	* Block指针；
-	* 使用__attribute__((NSObject)) 定义的typedef
-* 哪些对象不受ARC管理：
-	* 值类型（简单值类型，C语言struct）；
-	* 使用其它方式分配的堆对象（如使用malloc分配方式）；
-	* 非内存资源。
+#import <Foundation/Foundation.h>
+#import "ARCLibrary.h"
 
-### 2.引用计数管理
-* 新创建(使用alloc，new，copy等)一个引用类型对象，引用计数为1；
-* 对象引用计数加1————retain操作：
-	* 将对象引用赋值给其他变量或者常量；
-	* 将对象引用赋值给其他属性或者实例变量；
-	* 将对象传递给函数参数，或者返回值；
-	* 将对象加入集合中；
+OBJC_EXTERN int _objc_rootRetainCount(id);
 
-* 对象引用计数减1————release操作；
-	* 将局部变量或者全局变量赋值为nil或者其他值；
-	* 将属性赋值为nil或者其他值；
-	* 实例属性所在对象被释放；
-	* 参数或者局部变量离开函数；
-	* 将对象从集合中删除
+void arcDemo();
 
-* 引用计数变为0时，内存自动被释放
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        // insert code here...
+        NSLog(@"Hello, world!");
+        arcDemo();
+    }
+    return 0;
+}
 
-###3.代码演示
-1）main.m文件
+void printLog(NSObject *obj) {
+    NSLog(@"%@'s ARC count = %d",[obj className] ,_objc_rootRetainCount(obj));
+}
 
-```
 void arcDemo() {
     NSLog(@"ARC Demo Begin here ============");
     ARCLibrary *library = [[ARCLibrary alloc] init];
@@ -78,14 +72,15 @@ void arcDemo() {
 
     //4.属性赋值为nil retainCount = 0
     //如果把下面这行代码注释掉，则ARCBook的dealloc方法中打印的信息将会在”ARC demo finished here!“完成之后显示
-    book1 = nil;
+//    book1 = nil;
     
     NSLog(@"ARC demo finished here!============");
 }
 
-```
-2）控制台打印的信息
-![ARC Demo1.png](http://upload-images.jianshu.io/upload_images/2409226-3b49a280644619f9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-
-
-![ARC Demo2.png](http://upload-images.jianshu.io/upload_images/2409226-0b177f3b6f74b675.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+/*
+ *  ARC开启下获取引用计数的方法
+ *
+ *  1. 使用私有API OBJC_EXTERN int _objc_rootRetainCount(id)
+ *
+ *  1. 使用CFGetRetainCount CFGetRetainCount((__bridge CFTypeRef)(obj))
+ */
